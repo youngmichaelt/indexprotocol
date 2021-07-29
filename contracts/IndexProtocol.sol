@@ -131,8 +131,8 @@ contract IndexProtocol {
         // uint256 change = 1;
         uint256 supplyDelta;
         uint256 userDelta;
-        uint256 targetPrice = 20;
-        uint256 marketPrice = 4;
+        uint256 targetPrice = 2;
+        uint256 marketPrice = 9;
         int256 change;
         bool neg = false;
         
