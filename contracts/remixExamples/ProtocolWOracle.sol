@@ -159,9 +159,11 @@ contract IndexProtocol is ChainlinkClient{
         bool neg = false;
         
         
-        uint timesAmount = 10**15;
-        oracleTarget = oracleTarget / timesAmount;
-        oracleMarket = oracleMarket / timesAmount;
+        uint timesAmount = 10**18;
+        //oracleTarget = oracleTarget / timesAmount;
+        //oracleMarket = oracleMarket / timesAmount;
+        //oracleTarget = 10 * timesAmount;
+        //oracleMarket = 5 * timesAmount;
         
         
         change = deltaChange(oracleTarget, oracleMarket);
@@ -179,6 +181,7 @@ contract IndexProtocol is ChainlinkClient{
         supplyDelta = uint256(change.abs());
         supplyDelta *= totalSupply;
         supplyDelta /= 1000;
+        //supplyDelta /= timesAmount;
         
         //Split or merge token supply
         if (neg == true){
@@ -194,6 +197,7 @@ contract IndexProtocol is ChainlinkClient{
             userDelta = uint256(change.abs());
             userDelta *= balances[holders[i]];
             userDelta /= 1000;
+            //userDelta /= timesAmount;
        
             //rebase user supply
             if (neg == true){
