@@ -1,5 +1,4 @@
-pragma solidity 0.8.6;
-
+pragma solidity ^0.6.7;
 
 /**
  * @title Various utilities useful for uint256.

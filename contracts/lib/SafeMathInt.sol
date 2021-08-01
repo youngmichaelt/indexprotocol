@@ -24,8 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-pragma solidity 0.8.6;
-
+pragma solidity ^0.6.7;
 
 /**
  * @title SafeMathInt
