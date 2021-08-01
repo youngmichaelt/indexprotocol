@@ -40,6 +40,8 @@ contract IndexProtocol is ChainlinkClient{
     event Transfer(address indexed from, address indexed to, uint value);
     
     event Approval(address indexed owner, address indexed spender, uint value);
+
+    event Rebase(address indexed caller, uint targetPrice, uint marketPrice, uint change);
     
     constructor() public {
         balances[msg.sender] = totalSupply;
@@ -180,6 +182,8 @@ contract IndexProtocol is ChainlinkClient{
             change = change * -1;
             neg = true;
             }
+        
+        emit Rebase(msg.sender, oracleTarget, oracleMarket, uint256(change.abs()));
             
         supplyDelta = uint256(change.abs());
         supplyDelta *= totalSupply;
@@ -210,6 +214,7 @@ contract IndexProtocol is ChainlinkClient{
             }
             
         }
+        
         return true;
     }
     
