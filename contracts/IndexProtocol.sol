@@ -1,13 +1,21 @@
-pragma solidity ^0.6.7;
-import "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
+pragma solidity ^0.8.0;
+import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
 import "./lib/SafeMathInt.sol";
 import "./lib/UInt256Lib.sol";
+
+import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+
+import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
+// import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+// import "@uniswap/v3-core/contracts/UniswapV3Factory.sol";
+// import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 
 
 
 
 contract IndexProtocol is ChainlinkClient{
+    using Chainlink for Chainlink.Request;
     // using SafeMath for uint256;
     using SafeMathInt for int256;
     using UInt256Lib for uint256;
@@ -36,6 +44,8 @@ contract IndexProtocol is ChainlinkClient{
     
     uint public totalShares;
     uint public sharesPer;
+
+    address public uniswapV3PoolAddress;
     
     event Transfer(address indexed from, address indexed to, uint value);
     
@@ -53,7 +63,9 @@ contract IndexProtocol is ChainlinkClient{
         oracle = 0x3A56aE4a2831C3d3514b5D7Af5578E45eBDb7a40;
         jobId = "3b7ca0d48c7a4b2da9268456665d11ae";
         fee = 0.1 * 10 ** 18; // 0.1 LINK
-        
+
+        //uniswap testing
+        uniswapV3PoolAddress = address(0xeeCac0f984c6b69888c63D681a1731c4aC79bDC9);
         
         
         // totalShares = totalSupply;
@@ -276,6 +288,45 @@ contract IndexProtocol is ChainlinkClient{
         }
         
     }
+
+    //UNISWAP MARKET PRICE
+    function uniswapMarket(uint32 s0, uint32 s1) public view returns(uint160){
+        IUniswapV3Pool uniswapv3Pool = IUniswapV3Pool(0xeeCac0f984c6b69888c63D681a1731c4aC79bDC9);
+
+        uint32[] memory secondAgos = new uint32[](2);
+        secondAgos[0] = s0;
+        secondAgos[1] = s1;
+        
+        //return secondAgos[0];
+        
+        (int56[] memory tickCumulatives, uint160[] memory test) = uniswapv3Pool.observe(secondAgos);
+        
+        int56 tickCumulativesDiff = tickCumulatives[1] - tickCumulatives[0];
+        uint56 period = uint56(secondAgos[0]-secondAgos[1]);
+
+        int56 timeWeightedAverageTick = (tickCumulativesDiff / -int56(period));
+
+        //price = 1.0001 ** timeWeightedAverageTick;
+        uint160 sqrtRatioX96 = TickMath.getSqrtRatioAtTick(int24(timeWeightedAverageTick));
+        //uint160 sqrtRatioX96 = TickMath.getSqrtRatioAtTick(int24(-46087));
+        
+        uint160 temp = sqrtRatioX96 * 100000;
+        
+        uint160 ex = (2 ** 96);
+        
+        uint160 next = temp / ex;
+        
+        uint160 last = next ** 2;
+        
+        
+
+        // uint256 ratioX192 = uint256(sqrtRatioX96) * sqrtRatioX96;
+        // price = uint32((ratioX192 * 1e18) >> (96 * 2));
+
+        return last;
+
+    }
+    
     
     
     
