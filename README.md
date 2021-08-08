@@ -14,9 +14,10 @@ Target Price = NASDAQ indicator (14123ish) / 10,000 = $1.41
 
 To do(Development):
 1. Set up INDX token contract//Mostly done, just need to add requirements and emit functions.
-2. Create oracle contracts DONE.
-3. Incorporate oracle data with token contracts DONE.
-4. Test.
+2. Create oracle contracts and integrate Uniswap.
+3. Integrate oracle contract with token contracts.
+4. Add liquidity to Uniswap on Rinkeby. 
+5. Test.
 
 To do(General):
 1. Feedback.
