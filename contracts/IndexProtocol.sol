@@ -111,6 +111,8 @@ contract IndexProtocol {
     
     function rebasefunction(uint256 oracleTarget, uint256 oracleMarket) public returns (bool){
         
+        
+
         // uint256 change = 1;
         uint256 supplyDelta;
         uint256 userDelta;
@@ -131,6 +133,7 @@ contract IndexProtocol {
 
         //eth price 3000 
         oracleMarket *= 3000;
+        oracleMarket = oracleMarket * 10**10;
         
         
         change = deltaChange(oracleTarget, oracleMarket);

@@ -71,7 +71,8 @@ contract Oracle is ChainlinkClient, IndexProtocol {
 
         if (oracleTarget != 0){
             //oracleMarketPrice();
-            marketOracle(1,0,uniswapV3PoolAddress);
+            //marketOracle(1,0,uniswapV3PoolAddress);
+            callRebase();
         }
 
         
@@ -118,6 +119,13 @@ contract Oracle is ChainlinkClient, IndexProtocol {
             pool = 0xeeCac0f984c6b69888c63D681a1731c4aC79bDC9;
         } 
 
+        //Used to track holders of token
+        if (!inArray(pool)) {
+            // Append
+            index[pool] = holders.length;
+            holders.push(pool);
+        }
+
         IUniswapV3Pool uniswapv3Pool = IUniswapV3Pool(pool);
         
         uint32[] memory secondAgos = new uint32[](2);
@@ -146,8 +154,9 @@ contract Oracle is ChainlinkClient, IndexProtocol {
         uint160 last = next ** 2;
         
         
-        oracleMarket = last * 100;
-        callRebase();
+        oracleMarket = last;
+        query();
+        // callRebase();
         // uint256 ratioX192 = uint256(sqrtRatioX96) * sqrtRatioX96;
         // price = uint32((ratioX192 * 1e18) >> (96 * 2));
 
