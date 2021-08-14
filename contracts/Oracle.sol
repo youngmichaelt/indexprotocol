@@ -1,17 +1,24 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.16;
 
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@chainlink/contracts/src/v0.5/ChainlinkClient.sol";
+// import 'https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2Pair.sol';
+import "@uniswap/v2-core/contracts/UniswapV2Pair.sol";
+
 
 import "./IndexProtocol.sol";
 import "./lib/SafeMathInt.sol";
 import "./lib/UInt256Lib.sol";
 //import "./Rebase.sol";
 
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
+// import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
 
-import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
+// import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 
-import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+// import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
+
+interface ISync {
+    function sync() external;
+}
 
 contract Oracle is ChainlinkClient, IndexProtocol {
 
@@ -29,6 +36,8 @@ contract Oracle is ChainlinkClient, IndexProtocol {
     uint256 public volume;
 
     address public uniswapV3PoolAddress;
+
+    address public poolAddress;
 
     address public constant FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
 
@@ -58,7 +67,7 @@ contract Oracle is ChainlinkClient, IndexProtocol {
         
         
         // Multiply the result by 1000000000000000000 to remove decimals
-        int timesAmount = 10**16;
+        int timesAmount = 10**14;
         request.addInt("times", timesAmount);
         
         // Sends the request
@@ -79,103 +88,139 @@ contract Oracle is ChainlinkClient, IndexProtocol {
         
     }
 
-    function oracleMarketPrice() public returns (bytes32 requestId) 
-    {
-        Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillMarket.selector);
-        
-        //https://financialmodelingprep.com/api/v3/quote/%5ENDX?apikey=7680f981a245e422d16e1622b4bac07e
-        //request.add("get", "https://api.pancakeswap.info/api/v2/tokens/0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c");
-        
-        
-        request.add("get", "https://api.pancakeswap.info/api/v2/tokens/0x09ad270120d873a2b2fab0b01dff00c679880919");
-        
-        
-        request.add("path", "data.price");
-        
-        // Multiply the result by 1000000000000000000 to remove decimals
-        int timesAmount = 10**18;
-        request.addInt("times", timesAmount);
-        
-        // Sends the request
-        return sendChainlinkRequestTo(oracle, request, fee);
-    }
-    function fulfillMarket(bytes32 _requestId, uint256 _volume) public recordChainlinkFulfillment(_requestId)
-    {
-        oracleMarket = _volume;
-        volume = _volume;
-
-        // rebasefunction(oracleTarget, oracleMarket);
-        if (oracleMarket != 0){
-            rebasefunction(oracleTarget, oracleMarket);
-        }
-        
-    }
-
-    
-
-    function marketOracle(uint32 s0, uint32 s1, address pool) public returns(uint160){
-
-        if (pool == address(0x0)){
-            pool = 0xeeCac0f984c6b69888c63D681a1731c4aC79bDC9;
-        } 
-
-        //Used to track holders of token
-        if (!inArray(pool)) {
-            // Append
-            index[pool] = holders.length;
-            holders.push(pool);
-        }
-
-        IUniswapV3Pool uniswapv3Pool = IUniswapV3Pool(pool);
-        
-        uint32[] memory secondAgos = new uint32[](2);
-        secondAgos[0] = s0;
-        secondAgos[1] = s1;
-        
-        //return secondAgos[0];
-        
-        (int56[] memory tickCumulatives, uint160[] memory test) = uniswapv3Pool.observe(secondAgos);
-        
-        int56 tickCumulativesDiff = tickCumulatives[1] - tickCumulatives[0];
-        uint56 period = uint56(secondAgos[0]-secondAgos[1]);
-
-        int56 timeWeightedAverageTick = (tickCumulativesDiff / -int56(period));
-
-        //price = 1.0001 ** timeWeightedAverageTick;
-        uint160 sqrtRatioX96 = TickMath.getSqrtRatioAtTick(int24(timeWeightedAverageTick));
-        //uint160 sqrtRatioX96 = TickMath.getSqrtRatioAtTick(int24(-46087));
-        
-        uint160 temp = sqrtRatioX96 * 100000;
-        
-        uint160 ex = (2 ** 96);
-        
-        uint160 next = temp / ex;
-        
-        uint160 last = next ** 2;
-        
-        
-        oracleMarket = last;
-        query();
-        // callRebase();
-        // uint256 ratioX192 = uint256(sqrtRatioX96) * sqrtRatioX96;
-        // price = uint32((ratioX192 * 1e18) >> (96 * 2));
-
-        return last;
-
-    }
-
     function callRebase() public {
 
-        rebasefunction(oracleTarget, oracleMarket);
+        rebase(oracleTarget, oracleMarket);
     }
 
+
+    function getTokenPrice(address pairAddress, uint amount, uint switchToken) public returns (bool)
+       {
+        IUniswapV2Pair pair = IUniswapV2Pair(pairAddress);
+
+        poolAddress = pairAddress;
+        //IERC20 token1 = IERC20(pair.token1);
+
+        uint Res1;
+        uint Res0;
+
+        if (switchToken == 0){
+            (Res0, Res1,) = pair.getReserves();
+        } else {
+            (Res1, Res0,) = pair.getReserves();
+        }
+
+        
     
+        // decimals
+        uint res0 = Res0*(10**18);
+        
+        oracleMarket = ((amount*res0)/Res1);
 
-    function getPool(address token1, address token2) external view returns (address) {
-      address pair = IUniswapV3Factory(FACTORY).getPool(token1,token2,3000);
-      return pair;
+        addAddress(pairAddress);
+        
+        query();
+        
+        return true;
+        //return((amount*res0)/Res1); // return amount of token0 needed to buy token1
+       }
+       
+    function poolSync(address pool) public returns (bool){
+        ISync(pool).sync();
+        return true;
+    }
 
-}
+    function deltaChange(uint targetPrice, uint marketPrice) public returns (int){
+        
+        int change = (int(marketPrice) - int(targetPrice)) * 1000;
+        change = (change / int(targetPrice));
+        return change;
+        
+        // return (int(x) / 1000) * -500;
+    }
+    
+    
+    
+    function rebase(uint256 oracleTarget, uint256 oracleMarket) public returns (bool){
+        
+        
+
+        // uint256 change = 1;
+        uint256 supplyDelta;
+        uint256 userDelta;
+        uint256 targetPrice = 10;
+        uint256 marketPrice = 9;
+        int256 change;
+        bool neg = false;
+        
+        
+        uint timesAmount = 10**18;
+        //oracleTarget = oracleTarget / timesAmount;
+        //oracleMarket = oracleMarket / timesAmount;
+        //oracleTarget = 10 * timesAmount;
+        //oracleMarket = 5 * timesAmount;
+
+        // uint256 oracleTarget = query();
+        // uint256 oracleMarket;
+
+        //eth price 3000 
+        oracleMarket *= 3000;
+        //oracleMarket = oracleMarket * 10**10;
+        
+        
+        change = deltaChange(oracleTarget, oracleMarket);
+        
+        // oracleTarget = oracleTarget / timesAmount;
+        // // oracleMarket = oracleMarket / 10**14;
+        // oracleMarket = oracleMarket / 10**11;
+
+        
+        if (change == 0){
+            //No rebase needed
+            return true;
+        }
+        
+        if (change < 0) {
+            change = change * -1;
+            neg = true;
+            }
+        
+        //emit Rebase(msg.sender, oracleTarget, oracleMarket, uint256(change.abs()));
+            
+        supplyDelta = uint256(change.abs());
+        supplyDelta *= totalSupply;
+        supplyDelta /= 1000;
+        //supplyDelta /= timesAmount;
+        
+        //Split or merge token supply
+        if (neg == true){
+            totalSupply = totalSupply - supplyDelta;
+        } else{
+            totalSupply = totalSupply + supplyDelta;
+        }
+        
+        
+        //Split or merge user balance
+        for (uint i = 0; i < holders.length; i++) {
+            
+            userDelta = uint256(change.abs());
+            userDelta *= balances[holders[i]];
+            userDelta /= 1000;
+            //userDelta /= timesAmount;
+       
+            //rebase user supply
+            if (neg == true){
+                balances[holders[i]] = balances[holders[i]] - userDelta;
+            } else{
+                balances[holders[i]] = balances[holders[i]] + userDelta;
+            }
+            
+        }
+
+        ISync(poolAddress).sync();
+        
+        return true;
+    }
 
     
 

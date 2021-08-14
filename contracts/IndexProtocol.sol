@@ -1,6 +1,11 @@
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.16;
+
 import "./lib/SafeMathInt.sol";
 import "./lib/UInt256Lib.sol";
+
+
+
+
 contract IndexProtocol {
 
     using SafeMathInt for int256;
@@ -98,94 +103,94 @@ contract IndexProtocol {
         return false;
     }
 
-    function deltaChange(uint targetPrice, uint marketPrice) public returns (int){
+    // function deltaChange(uint targetPrice, uint marketPrice) public returns (int){
         
-        int change = (int(marketPrice) - int(targetPrice)) * 1000;
-        change = (change / int(targetPrice));
-        return change;
+    //     int change = (int(marketPrice) - int(targetPrice)) * 1000;
+    //     change = (change / int(targetPrice));
+    //     return change;
         
-        // return (int(x) / 1000) * -500;
-    }
+    //     // return (int(x) / 1000) * -500;
+    // }
     
     
     
-    function rebasefunction(uint256 oracleTarget, uint256 oracleMarket) public returns (bool){
+    // function rebasefunction(uint256 oracleTarget, uint256 oracleMarket) public returns (bool){
         
         
 
-        // uint256 change = 1;
-        uint256 supplyDelta;
-        uint256 userDelta;
-        uint256 targetPrice = 10;
-        uint256 marketPrice = 9;
-        int256 change;
-        bool neg = false;
+    //     // uint256 change = 1;
+    //     uint256 supplyDelta;
+    //     uint256 userDelta;
+    //     uint256 targetPrice = 10;
+    //     uint256 marketPrice = 9;
+    //     int256 change;
+    //     bool neg = false;
         
         
-        uint timesAmount = 10**18;
-        //oracleTarget = oracleTarget / timesAmount;
-        //oracleMarket = oracleMarket / timesAmount;
-        //oracleTarget = 10 * timesAmount;
-        //oracleMarket = 5 * timesAmount;
+    //     uint timesAmount = 10**18;
+    //     //oracleTarget = oracleTarget / timesAmount;
+    //     //oracleMarket = oracleMarket / timesAmount;
+    //     //oracleTarget = 10 * timesAmount;
+    //     //oracleMarket = 5 * timesAmount;
 
-        // uint256 oracleTarget = query();
-        // uint256 oracleMarket;
+    //     // uint256 oracleTarget = query();
+    //     // uint256 oracleMarket;
 
-        //eth price 3000 
-        oracleMarket *= 3000;
-        oracleMarket = oracleMarket * 10**10;
+    //     //eth price 3000 
+    //     oracleMarket *= 3000;
+    //     //oracleMarket = oracleMarket * 10**10;
         
         
-        change = deltaChange(oracleTarget, oracleMarket);
+    //     change = deltaChange(oracleTarget, oracleMarket);
         
-        oracleTarget = oracleTarget / timesAmount;
-        // oracleMarket = oracleMarket / 10**14;
-        oracleMarket = oracleMarket / 10**11;
+    //     // oracleTarget = oracleTarget / timesAmount;
+    //     // // oracleMarket = oracleMarket / 10**14;
+    //     // oracleMarket = oracleMarket / 10**11;
 
         
-        if (change == 0){
-            //No rebase needed
-            return true;
-        }
+    //     if (change == 0){
+    //         //No rebase needed
+    //         return true;
+    //     }
         
-        if (change < 0) {
-            change = change * -1;
-            neg = true;
-            }
+    //     if (change < 0) {
+    //         change = change * -1;
+    //         neg = true;
+    //         }
         
-        //emit Rebase(msg.sender, oracleTarget, oracleMarket, uint256(change.abs()));
+    //     //emit Rebase(msg.sender, oracleTarget, oracleMarket, uint256(change.abs()));
             
-        supplyDelta = uint256(change.abs());
-        supplyDelta *= totalSupply;
-        supplyDelta /= 1000;
-        //supplyDelta /= timesAmount;
+    //     supplyDelta = uint256(change.abs());
+    //     supplyDelta *= totalSupply;
+    //     supplyDelta /= 1000;
+    //     //supplyDelta /= timesAmount;
         
-        //Split or merge token supply
-        if (neg == true){
-            totalSupply = totalSupply - supplyDelta;
-        } else{
-            totalSupply = totalSupply + supplyDelta;
-        }
+    //     //Split or merge token supply
+    //     if (neg == true){
+    //         totalSupply = totalSupply - supplyDelta;
+    //     } else{
+    //         totalSupply = totalSupply + supplyDelta;
+    //     }
         
         
-        //Split or merge user balance
-        for (uint i = 0; i < holders.length; i++) {
+    //     //Split or merge user balance
+    //     for (uint i = 0; i < holders.length; i++) {
             
-            userDelta = uint256(change.abs());
-            userDelta *= balances[holders[i]];
-            userDelta /= 1000;
-            //userDelta /= timesAmount;
+    //         userDelta = uint256(change.abs());
+    //         userDelta *= balances[holders[i]];
+    //         userDelta /= 1000;
+    //         //userDelta /= timesAmount;
        
-            //rebase user supply
-            if (neg == true){
-                balances[holders[i]] = balances[holders[i]] - userDelta;
-            } else{
-                balances[holders[i]] = balances[holders[i]] + userDelta;
-            }
+    //         //rebase user supply
+    //         if (neg == true){
+    //             balances[holders[i]] = balances[holders[i]] - userDelta;
+    //         } else{
+    //             balances[holders[i]] = balances[holders[i]] + userDelta;
+    //         }
             
-        }
+    //     }
         
-        return true;
-    }
+    //     return true;
+    // }
 
 }
