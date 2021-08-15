@@ -16,6 +16,32 @@ Target Price = NASDAQ indicator (14123ish) / 10,000 = $1.41
 
 Prices are found using the Uniswap V2 contracts as well as Chainlink oracles and price feeds. We have to use the Uniswap V2 contracts as the V3 contracts do not support all the features of a rebasible token. 
 
+Rebase/Restructure Example:
+
+Mike has 100 INDX tokens.
+Market Price(mP): $2
+Target Price(tP): $1
+
+Change Calculation: (mP - tP)/ tP || (2 - 1) / 1 = 1
+
+We find that the change is 1. Now, we can update the total supply as well as the supply of token holders based on this. 
+
+change(c) = 1
+Total Supply(tS) = 1000
+Calculation: tS + (tS * c) || 1000 + (1000 * 1) = 2000
+
+Now every token will be worth the target price ($1), half of the original market price ($2).
+
+This calculation is the same for users tokens. 
+
+change(c) = 1
+User Supply(uS) = 100
+Calculation: uS + (uS * c) || 100 + (100 * 1) = 200
+
+Mike's tokens are now worth $1 each instead of $2, notice how he still retains the same total value. 
+
+
+
 To do(Development):
 1. Clean up code. 
 2. Add more oracles. 
