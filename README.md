@@ -6,6 +6,8 @@ It allows users from any part of the world to invest in a decentralized blockcha
 
 The Index Protocol also gives crypto users the ability to invest in a more stable currency, while not having to move their money off chain to a centralized entity.
 
+## Rebase Strategy
+
 To keep the price pegged to the NASDAQ indicator, INDX token is restructured/rebased after a specific amount of time.
 
 During this restructure/rebase, the INDX protocol will split or merge INDX tokens based on target price of the NASDAQ and market prices of INDX token.
@@ -14,9 +16,11 @@ This restructuring of the supply of INDX tokens will influence market movements 
 
 Target Price = NASDAQ indicator (14123ish) / 10,000 = $1.41 
 
+## Oracles
+
 Prices are found using the Uniswap V2 contracts as well as Chainlink oracles and price feeds. We have to use the Uniswap V2 contracts as the V3 contracts do not support all the features of a rebasible token. 
 
-Rebase/Restructure Example:
+## Rebase Calculation Example:
 
 Mike has 100 INDX tokens.
 Market Price(mP): $2
@@ -42,7 +46,7 @@ Mike's tokens are now worth $1 each instead of $2, notice how he still retains t
 
 
 
-To do(Development):
+## To do(Development):
 1. Clean up code. 
 2. Add more oracles. 
 3. Add token to more dexes and integrate in contracts. 
@@ -52,7 +56,7 @@ To do(Development):
 7. Audit. 
 8. Test more. 
 
-To do(General):
+## To do(General):
 1. Feedback.
 2. Testing with users.
 3. Test gas prices.
