@@ -32,6 +32,7 @@ We find that the change is 1. Now, we can update the total supply as well as the
 
 change(c) = 1
 Total Supply(tS) = 1000
+
 Calculation: tS + (tS * c) || 1000 + (1000 * 1) = 2000
 
 Now every token will be worth the target price ($1), half of the original market price ($2).
@@ -40,6 +41,7 @@ This calculation is the same for users tokens.
 
 change(c) = 1
 User Supply(uS) = 100
+
 Calculation: uS + (uS * c) || 100 + (100 * 1) = 200
 
 Mike's tokens are now worth $1 each instead of $2, notice how he still retains the same total value. 
