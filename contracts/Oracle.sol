@@ -4,8 +4,6 @@ import "@chainlink/contracts/src/v0.5/ChainlinkClient.sol";
 import "@uniswap/v2-core/contracts/UniswapV2Pair.sol";
 import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
 
-
-
 import "./IndexProtocol.sol";
 import "./lib/SafeMathInt.sol";
 import "./lib/UInt256Lib.sol";
@@ -52,6 +50,37 @@ contract Oracle is ChainlinkClient, IndexProtocol {
 
     }
 
+    function startRebase(address pairAddress, uint amount, uint switchToken) public {
+        getMarketPrice(pairAddress, amount, switchToken);
+    }
+
+    function getMarketPrice(address pairAddress, uint amount, uint switchToken) public returns (bool)
+       {
+        IUniswapV2Pair pair = IUniswapV2Pair(pairAddress);
+
+        poolAddress = pairAddress;
+
+        uint Res1;
+        uint Res0;
+
+        if (switchToken == 0){
+            (Res0, Res1,) = pair.getReserves();
+        } else {
+            (Res1, Res0,) = pair.getReserves();
+        }
+
+        // decimals
+        uint res0 = Res0*(10**18);
+        
+        oracleMarket = ((amount*res0)/Res1);
+
+        addAddress(pairAddress);
+        
+        getTargetPrice();
+        
+        return true;
+       }
+
     function getTargetPrice() public returns (bytes32 requestId) 
     {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
@@ -86,34 +115,6 @@ contract Oracle is ChainlinkClient, IndexProtocol {
         rebase(oracleTarget, oracleMarket);
     }
 
-
-    function getMarketPrice(address pairAddress, uint amount, uint switchToken) public returns (bool)
-       {
-        IUniswapV2Pair pair = IUniswapV2Pair(pairAddress);
-
-        poolAddress = pairAddress;
-
-        uint Res1;
-        uint Res0;
-
-        if (switchToken == 0){
-            (Res0, Res1,) = pair.getReserves();
-        } else {
-            (Res1, Res0,) = pair.getReserves();
-        }
-
-        // decimals
-        uint res0 = Res0*(10**18);
-        
-        oracleMarket = ((amount*res0)/Res1);
-
-        addAddress(pairAddress);
-        
-        getTargetPrice();
-        
-        return true;
-       }
-       
     function poolSync(address pool) public returns (bool){
         ISync(pool).sync();
         return true;
