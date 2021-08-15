@@ -64,3 +64,8 @@ Mike's tokens are now worth $1 each instead of $2, notice how he still retains t
 3. Test gas prices.
 4. Create webpage for general information.
 
+Cons:
+1. High LINK costs. 
+2. High ETH transaction fees. 
+3. Have to use older version of Uniswap.
+
