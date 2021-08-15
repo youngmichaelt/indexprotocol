@@ -14,7 +14,7 @@ During this restructure/rebase, the INDX protocol will split or merge INDX token
 
 This restructuring of the supply of INDX tokens will influence market movements to stablize the price to the NASDAQ indicator. 
 
-Target Price = NASDAQ indicator (14123ish) / 10,000 = $1.41 
+Target Price = NASDAQ indicator (15123ish) / 10,000 = $1.51 
 
 ## Oracles
 
